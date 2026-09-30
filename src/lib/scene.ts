@@ -106,11 +106,38 @@ const ON_DESK: Slot[] = ["monitor", "peripheral", "lighting", "audio"];
  * default — the keyboard belongs dead centre, the mouse to its right.
  */
 const OVERRIDES: Record<string, Partial<{ x: number; z: number; rotY: number }>> = {
+  // Peripherals
   "kb-mx-keys": { x: -0.04, z: 0.16 },
   "mouse-mx-master": { x: 0.3, z: 0.17 },
-  // The lamp is 0.38 m wide, so anything past x≈0.41 hangs off a 1.2 m desk.
+  "laptop-stand": { x: -0.44, z: -0.06, rotY: 0.25 },
+  "dock-display": { x: 0.22, z: -0.16 },
+  "webcam-brio": { x: 0, z: -0.18 },
+  starlink: { x: 1.45, z: -0.65 },
+
+  // Lighting
   "lamp-desk": { x: 0.39, z: -0.1 },
-  nespresso: { x: -0.92, z: -0.05, rotY: 0.2 },
+  "lamp-hue-signe": { x: -1.45, z: -0.85 },
+
+  // Audio
+  "mic-shure": { x: -0.42, z: 0.12, rotY: 0.4 },
+  "speaker-marshall": { x: -1.35, z: -0.35, rotY: 0.3 },
+  homepod: { x: -0.48, z: -0.16 },
+
+  // Comfort
+  "plant-monstera": { x: 1.05, z: 0.15, rotY: 0.3 },
+  "air-purifier": { x: 0.98, z: -0.45 },
+  dehumidifier: { x: -1.35, z: -0.45 },
+  whiteboard: { x: 1.4, z: -0.85 },
+
+  // Lifestyle
+  nespresso: { x: -0.96, z: -0.05, rotY: 0.2 },
+  "coffee-bosch": { x: -0.78, z: -0.05, rotY: -0.2 },
+  "walk-pad": { x: -0.72, z: 0.55 },
+  projector: { x: -0.9, z: 0.12 },
+  ps5: { x: -0.9, z: -0.05 },
+  "spin-bike": { x: -1.65, z: 0.25 },
+  "massage-gun": { x: -0.86, z: 0.12 },
+  padel: { x: -1.18, z: 0.15 },
 };
 
 function placementsFor(item: SetupItem, deskTop: number): Placement[] {
@@ -155,7 +182,38 @@ export function layoutScene(setup: Setup): Placement[] {
     ...setup.accessories,
   ].filter((i): i is SetupItem => Boolean(i));
 
-  return items.flatMap((item) => placementsFor(item, deskTop));
+  const placements: Placement[] = [];
+
+  for (const item of items) {
+    const itemPlacements = placementsFor(item, deskTop);
+    for (const p of itemPlacements) {
+      // Dynamic collision avoidance:
+      // If position overlaps an existing placed item on the same vertical level (within 0.18m),
+      // offset it outwards along X so they don't clip into each other.
+      let [x, y, z] = p.position;
+      let collision = true;
+      let attempts = 0;
+
+      while (collision && attempts < 6) {
+        collision = placements.some(
+          (other) =>
+            Math.abs(other.position[1] - y) < 0.1 &&
+            Math.hypot(other.position[0] - x, other.position[2] - z) < 0.08,
+        );
+        if (collision) {
+          x += x >= 0 ? 0.22 : -0.22;
+          attempts++;
+        }
+      }
+
+      placements.push({
+        ...p,
+        position: [x, y, z],
+      });
+    }
+  }
+
+  return placements;
 }
 
 /** Widest x-extent of the current setup, so the camera can frame it. */

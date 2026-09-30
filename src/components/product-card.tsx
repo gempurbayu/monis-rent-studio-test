@@ -111,17 +111,17 @@ export function ProductCard({ product, qty }: ProductCardProps) {
 
       {/* Size / variant picker */}
       {selected && product.variants && (
-        <div className="border-sand-200 flex gap-1 border-t px-3 py-2">
+        <div className="border-sand-200 flex gap-1 border-t px-3 py-2 bg-sand-50/50">
           {product.variants.map((v) => (
             <button
               key={v.id}
               type="button"
               onClick={() => setVariant(product.id, v.id)}
               className={cn(
-                "flex-1 rounded-lg px-2 py-1 text-[11px] font-medium transition",
+                "flex-1 rounded-lg px-2 py-1 text-[11px] font-semibold transition",
                 v.id === activeVariantId
-                  ? "bg-ink-900 text-white"
-                  : "bg-sand-100 text-ink-700 hover:bg-sand-200",
+                  ? "bg-teal-800 text-white shadow-2xs"
+                  : "bg-white border border-sand-200 text-ink-700 hover:bg-sand-100",
               )}
             >
               {v.label}
@@ -130,19 +130,47 @@ export function ProductCard({ product, qty }: ProductCardProps) {
         </div>
       )}
 
-      {/* Quantity stepper for stackable accessories */}
-      {selected && !isBase && product.maxQty > 1 && (
-        <div className="border-sand-200 flex items-center justify-between border-t px-3 py-2">
-          <span className="text-ink-600 text-xs font-medium">Quantity</span>
-          <div className="flex items-center gap-1">
+      {/* Action footer */}
+      <div className="border-sand-200 border-t p-2.5 bg-sand-50/40">
+        {isBase ? (
+          <button
+            type="button"
+            onClick={primaryAction}
+            className={cn(
+              "flex w-full items-center justify-center gap-1.5 rounded-xl py-1.5 text-xs font-bold transition",
+              selected
+                ? "bg-teal-800 text-white shadow-xs"
+                : "border border-sand-300 bg-white text-ink-800 hover:border-teal-500 hover:bg-teal-50",
+            )}
+          >
+            {selected ? (
+              <>
+                <Check className="size-3.5" strokeWidth={3} />
+                <span>Selected</span>
+              </>
+            ) : (
+              <span>Select {product.slot}</span>
+            )}
+          </button>
+        ) : !selected ? (
+          <button
+            type="button"
+            onClick={primaryAction}
+            className="flex w-full items-center justify-center gap-1.5 rounded-xl border border-sand-300 bg-white py-1.5 text-xs font-semibold text-ink-800 transition hover:border-teal-500 hover:bg-teal-50 shadow-2xs"
+          >
+            <Plus className="size-3.5 text-teal-700" />
+            <span>Add to setup</span>
+          </button>
+        ) : product.maxQty > 1 ? (
+          <div className="flex items-center justify-between rounded-xl border border-sand-300 bg-white p-1">
             <StepBtn
               label={`Remove one ${product.name}`}
               onClick={() => setQty(product.id, qty - 1)}
             >
               <Minus className="size-3.5" strokeWidth={2.5} />
             </StepBtn>
-            <span className="text-ink-900 w-5 text-center text-sm font-semibold tabular-nums">
-              {qty}
+            <span className="text-ink-900 text-xs font-bold tabular-nums">
+              {qty} in setup
             </span>
             <StepBtn
               label={`Add one ${product.name}`}
@@ -152,18 +180,16 @@ export function ProductCard({ product, qty }: ProductCardProps) {
               <Plus className="size-3.5" strokeWidth={2.5} />
             </StepBtn>
           </div>
-        </div>
-      )}
-
-      {selected && !isBase && product.maxQty === 1 && (
-        <button
-          type="button"
-          onClick={() => setQty(product.id, 0)}
-          className="border-sand-200 text-ink-600 hover:text-coral-600 border-t px-3 py-2 text-xs font-medium"
-        >
-          Remove
-        </button>
-      )}
+        ) : (
+          <button
+            type="button"
+            onClick={() => setQty(product.id, 0)}
+            className="flex w-full items-center justify-center gap-1.5 rounded-xl border border-sand-300 bg-white py-1.5 text-xs font-semibold text-ink-600 hover:text-coral-600 hover:border-coral-300 hover:bg-coral-50/50 transition"
+          >
+            <span>Remove from setup</span>
+          </button>
+        )}
+      </div>
     </div>
   );
 }

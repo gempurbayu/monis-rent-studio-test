@@ -49,8 +49,9 @@ export function SummaryPanel({ setup, quote }: SummaryPanelProps) {
             </button>
           ))}
         </div>
-        {quote.discountRate > 0 && (
-          <p className="text-teal-500 mt-1.5 text-[11px] font-medium">
+        {quote.discountRate > 0 && quote.itemCount > 0 && (
+          <p className="text-teal-700 mt-1.5 text-[11px] font-semibold flex items-center gap-1">
+            <span className="size-1.5 rounded-full bg-teal-600" />
             Long-stay discount {Math.round(quote.discountRate * 100)}% applied
           </p>
         )}
@@ -76,14 +77,14 @@ export function SummaryPanel({ setup, quote }: SummaryPanelProps) {
           </div>
         </div>
 
-        {savings > 0 && (
-          <p className="bg-teal-400/12 text-teal-500 mt-3 rounded-xl px-3 py-2 text-xs font-semibold">
+        {savings > 0 && quote.itemCount > 0 && (
+          <p className="bg-teal-50 border border-teal-200/80 text-teal-800 mt-3 rounded-xl px-3 py-2 text-xs font-semibold">
             You&apos;re saving {formatUSD(savings)}/week on current deals
           </p>
         )}
 
         <p className="text-ink-600 mt-3 flex items-center gap-1.5 text-[11px]">
-          <Truck className="size-3.5 shrink-0" />
+          <Truck className="size-3.5 shrink-0 text-teal-700" />
           Free delivery, setup and pickup across Bali
         </p>
       </div>
@@ -92,7 +93,7 @@ export function SummaryPanel({ setup, quote }: SummaryPanelProps) {
         {ready ? (
           <Link
             href="/checkout"
-            className="bg-coral-500 hover:bg-coral-600 flex w-full items-center justify-center gap-2 rounded-2xl px-4 py-3.5 text-sm font-bold text-white shadow-[0_12px_24px_-12px_rgb(249_111_44/0.7)] transition"
+            className="bg-coral-500 hover:bg-coral-600 flex w-full items-center justify-center gap-2 rounded-2xl px-4 py-3.5 text-sm font-bold text-white shadow-[0_12px_24px_-12px_rgb(249_111_44/0.7)] transition active:scale-[0.99]"
           >
             Rent your setup
             <ArrowRight className="size-4" strokeWidth={2.5} />
@@ -102,11 +103,11 @@ export function SummaryPanel({ setup, quote }: SummaryPanelProps) {
             <button
               type="button"
               disabled
-              className="bg-sand-200 text-ink-600/60 w-full cursor-not-allowed rounded-2xl px-4 py-3.5 text-sm font-bold"
+              className="bg-sand-100 border border-sand-300 text-ink-400 w-full cursor-not-allowed rounded-2xl px-4 py-3.5 text-sm font-bold"
             >
               Rent your setup
             </button>
-            <p className="text-ink-600 mt-2 text-center text-[11px]">
+            <p className="text-ink-500 mt-2 text-center text-[11px]">
               {quote.itemCount === 0
                 ? "Add a desk and a chair to continue"
                 : !setup.desk

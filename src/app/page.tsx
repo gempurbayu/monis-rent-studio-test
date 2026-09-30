@@ -6,20 +6,21 @@ export default function HomePage() {
     <>
       <SiteHeader />
 
-      <section className="mx-auto w-full max-w-7xl px-4 pt-10 pb-6 sm:px-6 lg:px-8">
-        <p className="text-coral-600 text-xs font-bold tracking-[0.18em] uppercase">
-          Rent by the week · Bali
-        </p>
-        <h1 className="text-ink-900 mt-3 max-w-3xl text-4xl leading-[1.05] font-bold tracking-tight sm:text-5xl">
-          Design your workspace.
-          <br />
-          <span className="text-ink-600">Then rent the whole thing.</span>
-        </h1>
-        <p className="text-ink-600 mt-4 max-w-xl text-base">
-          Just landed and need an office by next week? Pick a desk, drop in a
-          chair, stack on monitors and a plant — watch it come together, then hit
-          rent. Delivered, set up and picked up for you.
-        </p>
+      <section className="mx-auto w-full max-w-7xl px-4 pt-5 pb-3 sm:px-6 lg:px-8">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="rounded-full bg-teal-50 border border-teal-200/80 px-2.5 py-0.5 text-[10px] font-bold text-teal-800 uppercase tracking-widest">
+                Bali Studio Rentals
+              </span>
+              <span className="text-xs text-ink-400">· Deliver & setup across Bali</span>
+            </div>
+            <h1 className="text-ink-900 mt-1.5 text-2xl font-bold tracking-tight sm:text-3xl">
+              Design your workspace.{" "}
+              <span className="text-ink-500 font-normal">Then rent the whole thing.</span>
+            </h1>
+          </div>
+        </div>
       </section>
 
       <main className="flex-1">
