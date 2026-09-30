@@ -1,26 +1,65 @@
 @import "tailwindcss";
 
+@theme {
+  /* Brand — warm Bali sand + deep teal, coral accent */
+  --color-sand-50: #fdfbf7;
+  --color-sand-100: #f8f3ea;
+  --color-sand-200: #efe6d6;
+  --color-sand-300: #e0d0b6;
+
+  --color-ink-900: #10231f;
+  --color-ink-800: #17322c;
+  --color-ink-700: #1f453c;
+  --color-ink-600: #2c5f52;
+
+  --color-teal-400: #3fa08a;
+  --color-teal-500: #2f8672;
+
+  --color-coral-400: #ff8a52;
+  --color-coral-500: #f96f2c;
+  --color-coral-600: #e2571a;
+
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+
+  --radius-4xl: 2rem;
+}
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: var(--color-sand-50);
+  --foreground: var(--color-ink-900);
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+@layer base {
+  html {
+    -webkit-tap-highlight-color: transparent;
+  }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+  body {
+    background: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-sans);
+  }
+
+  /* Subtle grain so the isometric stage doesn't read as flat */
+  .stage-grain::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.35;
+    background-image: radial-gradient(
+      circle at 1px 1px,
+      rgb(0 0 0 / 0.06) 1px,
+      transparent 0
+    );
+    background-size: 14px 14px;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@utility no-scrollbar {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
 }
