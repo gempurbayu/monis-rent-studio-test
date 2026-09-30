@@ -27,6 +27,9 @@ const DESK_TOPS: Record<string, number> = {
 /** Fallback desk height when no desk is chosen or it has no mesh. */
 export const DESK_TOP = 0.74;
 
+/** Height of the side credenza / utility table for lifestyle and coffee gear. */
+export const SIDE_TABLE_TOP = 0.58;
+
 function deskTopFor(setup: Setup): number {
   const id = setup.desk?.productId;
   if (!id) return 0;
@@ -90,9 +93,8 @@ const SLOT_LAYOUT: Record<
   audio: { pos: [-0.5, DESK_TOP, -0.12], spread: 0.28, rotY: 0.4 },
   // On the floor, beside the desk.
   comfort: { pos: [0.95, 0, -0.1], spread: 0.45, rotY: 0.3 },
-  // Lifestyle items are deliberately off-desk — they're the "outside work"
-  // part of the rental — but they sit close enough to read as one setup.
-  lifestyle: { pos: [-0.95, 0, -0.1], spread: 0.45, rotY: 0.3 },
+  // Lifestyle items sit on the dedicated side credenza / table beside the desk.
+  lifestyle: { pos: [-0.92, SIDE_TABLE_TOP, -0.05], spread: 0.35, rotY: 0.2 },
 };
 
 /** Items that sit on the desktop and must sink to the floor without one. */
@@ -107,7 +109,7 @@ const OVERRIDES: Record<string, Partial<{ x: number; z: number; rotY: number }>>
   "mouse-mx-master": { x: 0.3, z: 0.17 },
   // The lamp is 0.38 m wide, so anything past x≈0.41 hangs off a 1.2 m desk.
   "lamp-desk": { x: 0.39, z: -0.1 },
-  nespresso: { x: -0.95, z: -0.1, rotY: 0.3 },
+  nespresso: { x: -0.92, z: -0.05, rotY: 0.2 },
 };
 
 function placementsFor(item: SetupItem, deskTop: number): Placement[] {
@@ -118,17 +120,16 @@ function placementsFor(item: SetupItem, deskTop: number): Placement[] {
   const qty = Math.max(1, item.qty);
   const override = OVERRIDES[product.id] ?? {};
 
-  // Desktop items sit on whichever desk is chosen, and drop to the floor when
-  // there's no desk at all, rather than floating in mid-air.
+  // Desktop items sit on whichever desk is chosen, lifestyle items on the side table.
   const onDesk = ON_DESK.includes(product.slot);
-  const baseY = onDesk ? deskTop : layout.pos[1];
+  const onSideTable = product.slot === "lifestyle";
+  const baseY = onDesk ? deskTop : onSideTable ? SIDE_TABLE_TOP : layout.pos[1];
 
   const start = -((qty - 1) / 2) * layout.spread;
 
   return Array.from({ length: qty }, (_, i) => {
     const offset = start + i * layout.spread;
     const x = (override.x ?? layout.pos[0]) + offset;
-    // Fan duplicates slightly forward so they don't hide behind each other.
     const z = (override.z ?? layout.pos[2]) + Math.abs(offset) * 0.12;
     // Angle copies inward, the way people actually arrange dual monitors.
     const rotY = (override.rotY ?? layout.rotY) - offset * 0.45;

@@ -1,21 +1,20 @@
 # Monis Studio — design your Bali workspace
 
-An interactive workspace configurator for [monis.rent](https://www.monis.rent),
+An interactive 3D workspace configurator for [monis.rent](https://www.monis.rent),
 which rents office equipment to digital nomads and startups in Bali. Pick a
 desk, pick a chair, pile on monitors, lamps, plants and a coffee machine, watch
-the setup come together, then rent it by the week.
+the setup come together in real-time 3D, then rent it by the week.
 
 Built for the Desent Solutions developer challenge.
 
 - **Live URL:** _pending deploy_
-- **Stack:** Next.js 16 (App Router) · TypeScript · Tailwind CSS v4 · Vercel
+- **Stack:** Next.js 16 (App Router) · React 19 · Three.js · React Three Fiber · TypeScript · Tailwind CSS v4 · Zustand · Vitest
 
 ---
 
 ## Status
 
-Foundation is in place and verified — `tsc`, `eslint` and `next build` all
-clean, smoke-tested in a real browser. The configurator UI is next.
+Fully functional and verified — `vitest`, `tsc`, `eslint` and `next build` (Turbopack) all clean, smoke-tested in a live browser.
 
 | Layer | File | State |
 | --- | --- | --- |
@@ -23,52 +22,54 @@ clean, smoke-tested in a real browser. The configurator UI is next.
 | Catalog (real monis.rent data) | `src/data/catalog.ts` | done — 34 products, 3 presets |
 | Pricing engine | `src/lib/pricing.ts` | done — variants, long-stay discounts |
 | State store | `src/store/workspace-store.ts` | done — Zustand + localStorage persist |
-| Isometric stage / picker / checkout | `src/components/*` | in progress |
+| 3D Scene & Layout engine | `src/lib/scene.ts`, `src/lib/finishes.ts` | done — physical meter layout, finishes |
+| Interactive 3D Stage | `src/components/workspace-scene.tsx`, `stage-panel.tsx` | done — R3F, OrbitControls, dynamic SideTable |
+| Configurator & Checkout UI | `src/components/configurator.tsx`, `checkout-view.tsx` | done |
+| Regression test suite | `src/lib/scene.test.ts` | done — 15 passing tests |
 
-`src/app/page.tsx` currently holds a scaffold-check page that exercises the
-catalog, every store mutation and the quote engine. It gets replaced by the real
-configurator.
+---
 
 ## Approach
 
 The brief's real point is in one line: _"the user doesn't want to just click
-through a boring product catalog."_ So the product decisions came first and the
+through a boring product catalog."_ The product decisions came first and the
 architecture follows from them.
 
-**One stage, always visible.** The setup renders as a layered isometric scene,
-not a cart. Every product carries a `StageAnchor` (`x`, `y`, `scale`, `layer`),
-so adding a monitor puts a monitor on the desk rather than a row in a table. A
-`highlight` field in the store marks the item you just touched so the stage can
-pop it — the feedback loop that makes the thing feel alive.
+**Interactive 3D Stage, always visible.** The setup renders as an interactive, real-time 3D scene using Three.js and React Three Fiber. Users can orbit, zoom, and inspect every angle of their desk setup. Every item has physical meter-based placement coordinates (`x`, `y`, `z`) and rotation (`rotY`), anchored to the desk's physical height (`DESK_TOP`).
+
+**Ergonomic & Realistic Workspace Staging.** The workstation layout reflects genuine ergonomic practices:
+- **Chair placement:** The chair sits cleanly in front of the desk facing the workstation and monitors, with correct ground alignment and seat tuck.
+- **Dedicated Side Credenza (`SideTable`):** Lifestyle gear (such as the Nespresso machine) sits on a dedicated side table beside the main desk at `SIDE_TABLE_TOP = 0.58m`, rather than on the floor. Its top surface dynamically syncs with the active desk finish (warm oak wood or graphite).
+- **Default Camera View:** Elevated front-view perspective positioned behind the chair looking across the desk towards the displays, giving an immediate sense of sitting down to work.
+- **Mechanical Keyboard Upgrade:** Equipped with a dedicated high-fidelity mechanical keyboard model with sculpted keycaps, PBR textures, and per-key RGB backlighting, auto-grounded flush to the desktop.
 
 **Presets over empty state.** A first-time visitor lands on a complete,
-good-looking setup in one click (The Lean Nomad / The Deep Worker / The Creator
-Studio) instead of a blank canvas. Much faster path to "get excited and hit
-Rent".
+good-looking setup in one click (The Lean Nomad / The Deep Worker / The Dual Screen)
+instead of a blank canvas. Much faster path to "get excited and hit Rent".
 
 **Real inventory, rewritten copy.** Products, weekly prices, discounts and
-photography come from the live monis.rent Bali catalog. The descriptions do not:
-the real site ships full spec sheets ("99% sRGB, 8-bit (6-bit + FRC), 6 ms
-response time…"), which is exactly the spreadsheet experience this tool
-replaces. Each item gets one human line instead.
+photography come from the live monis.rent Bali catalog. Descriptions are rewritten into concise, engaging copy instead of dry spec sheets.
 
 **Rent-by-the-week pricing is a first-class concept.** Rentals aren't
 e-commerce. Duration is part of the configuration, not a checkout afterthought,
-so the price changes as you move 1 week → 6 months (0% / 5% / 12% / 20%
-long-stay discount). `buildQuote()` is pure and takes `(setup, weeks)`, which
-makes it trivially testable.
+so the price updates dynamically as you move 1 week → 6 months (0% / 5% / 12% / 20%
+long-stay discount). `buildQuote()` is pure and takes `(setup, weeks)`, making it trivially testable.
+
+---
 
 ## Tech choices
 
 | Choice | Why |
 | --- | --- |
-| **Next.js 16 App Router** | Required. Static shell plus client islands: the stage is heavily interactive, the marketing frame isn't. |
-| **TypeScript, strict** | The setup shape (desk + chair + N accessories with variants and quantities) is where bugs live. Types make illegal states hard to build. |
-| **Tailwind CSS v4** | Required. Design tokens live in `@theme` inside `globals.css` — one brand palette (Bali sand, deep teal, coral), no config file. |
-| **Zustand + `persist`** | The whole app is one piece of shared state read by the stage, the picker and the checkout at once. Context would re-render the stage on every hover. `persist` means a refresh doesn't lose the setup you spent five minutes building. |
-| **Framer Motion** | Layout animations on the stage. Items should land, not appear. |
-| **dnd-kit** | For drag-to-place accessories on the desk — keyboard-accessible, unlike most DnD libraries. |
-| **CSS/DOM isometric scene, not three.js** | A 3D engine is ~500 KB and a week of asset work for this. Layered, anchored product photography gets ~90% of the "my setup!" feeling at a fraction of the budget, works on a phone, and stays accessible. |
+| **Next.js 16 App Router** | Required. Static shell plus client islands: the 3D stage and configurator are client-side interactive, while layout and headers remain static. |
+| **Three.js & React Three Fiber (@react-three/fiber + @react-three/drei)** | Real-time 3D canvas with PBR shading, soft contact shadows, directional bounce lighting, and smooth OrbitControls navigation. |
+| **TypeScript, strict** | The setup shape (desk + chair + N accessories with variants and quantities) is where bugs live. Strict types make illegal states impossible. |
+| **Tailwind CSS v4** | Design tokens live in `@theme` inside `globals.css` — one brand palette (Bali sand, deep teal, coral), with zero config files. |
+| **Zustand + `persist`** | Shared application state accessed by the 3D stage, product picker, and checkout at once. Context would re-render the stage on every hover; `persist` ensures setups survive page reloads. |
+| **Framer Motion** | Smooth UI transitions and toast highlights when items are added or modified. |
+| **Vitest** | Fast unit and regression testing for 3D placement geometry, manifest extents, desk bounds, and pricing. |
+
+---
 
 ## Running locally
 
@@ -78,6 +79,7 @@ npm run dev     # http://localhost:3000
 ```
 
 ```bash
+npm test        # run Vitest regression suite
 npm run build   # production build (Turbopack)
 npx tsc --noEmit
 npx eslint src
@@ -86,24 +88,15 @@ npx eslint src
 Product images are remote (`strapi.monis.rent`), allow-listed in
 `next.config.ts` under `images.remotePatterns`.
 
+---
+
 ## What I'd improve with more time
 
-- **Real drag & drop placement** — let users move a lamp or plant anywhere on
-  the desk and persist those coordinates, instead of fixed anchors per product.
-- **Shareable setups** — encode the setup in the URL so people can send their
-  dream office to a co-founder. The store shape is already serialisable.
-- **Availability and delivery dates** — monis.rent shows live stock ("Only 3
-  left") and same-day delivery. Wiring that in turns a nice toy into something
-  you'd actually transact on.
-- **Backend for the catalog** — the data layer is deliberately one module behind
-  a typed interface, so swapping the hardcoded array for the Strapi API is a
-  single-file change.
-- **Tests** — `buildQuote()` and the store reducers are pure and deserve unit
-  tests, plus a Playwright pass over "land → preset → tweak → checkout".
-- **Room styles** — villa / co-working / balcony backdrops for the stage, the
-  cheapest way to make the result feel personal.
+- **Freeform Drag & Drop placement** — let users drag accessories anywhere on the desk surface using raycasting and persist custom coordinates.
+- **Shareable setup URLs** — encode the setup state into URL search params or hash so nomads can share setups with co-founders.
+- **Live inventory sync** — connect to live stock APIs ("Only 2 left in Canggu") with estimated delivery dates.
+- **Room environments** — toggleable background presets (Bali villa, bamboo open-air coworking, modern loft) for different ambiances.
 
 ---
 
-Inventory data and product photography © monis.rent, used here to build this
-demonstration.
+Inventory data and product photography © monis.rent, used here to build this demonstration.

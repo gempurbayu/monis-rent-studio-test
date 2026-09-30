@@ -45,7 +45,14 @@ export function WorkspaceScene({
       <Canvas
         shadows
         dpr={[1, 1.8]}
-        camera={{ position: [2.1 + radius * 0.5, 1.5 + radius * 0.3, 2.6 + radius * 0.55], fov: 36 }}
+        camera={{
+          position: [
+            0.15,
+            1.88 + radius * 0.15,
+            2.65 + radius * 0.35,
+          ],
+          fov: 38,
+        }}
         gl={{ antialias: true, alpha: true }}
       >
         <color attach="background" args={["#f4ece0"]} />
@@ -73,6 +80,10 @@ export function WorkspaceScene({
               <PlacedModel key={p.key} placement={p} />
             ))}
 
+            {setup.desk && (
+              <SideTable deskProductId={setup.desk.productId} />
+            )}
+
             <Floor radius={radius} />
             <ContactShadows
               position={[0, 0.002, 0]}
@@ -90,7 +101,7 @@ export function WorkspaceScene({
           enabled={!readOnly}
           autoRotate={readOnly}
           autoRotateSpeed={0.55}
-          target={[0, 0.25, 0]}
+          target={[0, 0.58, 0]}
           minPolarAngle={0.25}
           maxPolarAngle={Math.PI / 2.08}
           minDistance={1.8}
@@ -125,6 +136,13 @@ function GLTFModel({
   // transform, and apply the product's finish to every mesh in it.
   const model = useMemo(() => {
     const clone = scene.clone(true);
+
+    // Auto-ground asset: ensure bottom surface rests on y=0
+    const bbox = new THREE.Box3().setFromObject(clone);
+    if (bbox.min.y < -0.005) {
+      clone.position.y -= bbox.min.y;
+    }
+
     const finish = finishFor(placement.productId);
     const material = new THREE.MeshStandardMaterial({
       color: new THREE.Color(finish.color),
@@ -138,7 +156,17 @@ function GLTFModel({
     });
     clone.traverse((child) => {
       if (child instanceof THREE.Mesh) {
-        child.material = material;
+        // Keep original textured materials if the mesh already has textures.
+        const mat = child.material as any;
+        const hasTexture = Boolean(
+          mat?.map ||
+          mat?.emissiveMap ||
+          mat?.normalMap ||
+          (Array.isArray(mat) && mat.some((m: any) => m.map))
+        );
+        if (!hasTexture) {
+          child.material = material;
+        }
         child.castShadow = true;
         child.receiveShadow = true;
       }
@@ -207,5 +235,44 @@ function Floor({ radius }: { radius: number }) {
       <circleGeometry args={[radius * 1.35, 64]} />
       <meshStandardMaterial color="#efe6d6" roughness={0.95} metalness={0} />
     </mesh>
+  );
+}
+
+/** Side credenza / utility table for coffee gear and personal items. */
+function SideTable({ deskProductId }: { deskProductId?: string }) {
+  const isOak = deskProductId === "desk-mechanical";
+  const topColor = isOak ? "#c08b55" : "#3d4240";
+  const bodyColor = "#262a28";
+
+  return (
+    <group position={[-0.92, 0, -0.05]}>
+      {/* Table top surface at y=0.58 */}
+      <mesh position={[0, 0.568, 0]} castShadow receiveShadow>
+        <boxGeometry args={[0.44, 0.024, 0.46]} />
+        <meshStandardMaterial color={topColor} roughness={0.65} metalness={0.15} />
+      </mesh>
+      {/* Cabinet storage body */}
+      <mesh position={[0, 0.31, 0]} castShadow receiveShadow>
+        <boxGeometry args={[0.40, 0.44, 0.42]} />
+        <meshStandardMaterial color={bodyColor} roughness={0.7} metalness={0.25} />
+      </mesh>
+      {/* Drawer accent line */}
+      <mesh position={[0, 0.33, 0.212]}>
+        <boxGeometry args={[0.34, 0.005, 0.003]} />
+        <meshStandardMaterial color="#141716" roughness={0.5} />
+      </mesh>
+      {/* Minimalist matte black base feet */}
+      {[
+        [-0.17, 0.045, -0.18],
+        [0.17, 0.045, -0.18],
+        [-0.17, 0.045, 0.18],
+        [0.17, 0.045, 0.18],
+      ].map(([x, y, z], i) => (
+        <mesh key={i} position={[x, y, z]} castShadow>
+          <cylinderGeometry args={[0.012, 0.012, 0.09, 16]} />
+          <meshStandardMaterial color="#1a1c1b" metalness={0.8} roughness={0.3} />
+        </mesh>
+      ))}
+    </group>
   );
 }

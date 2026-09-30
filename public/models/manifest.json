@@ -40,14 +40,14 @@
     "height": 0.676
   },
   "kb-mx-keys": {
-    "bytes": 36200,
+    "bytes": 343756,
     "extents": [
-      0.43,
-      0.101,
-      0.132
+      0.444,
+      0.041,
+      0.155
     ],
-    "faces": 60000,
-    "height": 0.101
+    "faces": 2844,
+    "height": 0.041
   },
   "lamp-desk": {
     "bytes": 6188,
