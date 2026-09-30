@@ -23,6 +23,8 @@ export interface ProductVariant {
   label: string;
   /** Weekly price delta applied on top of the base price, in USD. */
   priceDelta: number;
+  /** Live stock note from monis.rent, e.g. "Only 2 left". */
+  stock?: string;
 }
 
 export interface Product {
@@ -36,9 +38,10 @@ export interface Product {
   pricePerWeek: number;
   /** Original price when discounted, for strike-through display. */
   listPricePerWeek?: number;
+  /** Real product photography — catalog cards only. */
   image: string;
-  /** Emoji fallback used in the isometric stage and dense lists. */
-  glyph: string;
+  /** Key into the stage art registry (`src/components/art/stage-art.tsx`). */
+  art: string;
   badges?: string[];
   variants?: ProductVariant[];
   /** How many of this item a user may stack into one setup. */
