@@ -7,6 +7,7 @@ import { ProductPicker } from "@/components/product-picker";
 import { SlotRail } from "@/components/slot-rail";
 import { SummaryPanel } from "@/components/summary-panel";
 import { StagePanel } from "@/components/stage-panel";
+import { MockAssetToast } from "@/components/mock-asset-notice";
 
 /**
  * The configurator. Layout puts the stage and the running total in a sticky
@@ -20,6 +21,7 @@ export function Configurator() {
 
   return (
     <div className="mx-auto w-full max-w-7xl px-4 pb-24 sm:px-6 lg:px-8">
+      <MockAssetToast />
       <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_360px]">
         {/* Stage + catalog */}
         <div className="min-w-0">

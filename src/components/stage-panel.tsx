@@ -8,6 +8,7 @@ import { hasModel } from "@/lib/scene";
 import { PRODUCT_MAP } from "@/data/catalog";
 import { useWorkspace } from "@/store/workspace-store";
 import type { Setup } from "@/types/workspace";
+import { MockAssetDisclaimer } from "@/components/mock-asset-notice";
 
 /**
  * Wrapper around the 3D canvas.
@@ -71,11 +72,7 @@ export function StagePanel({ setup, readOnly, className }: StagePanelProps) {
         </>
       )}
 
-      {missing.length > 0 && (
-        <span className="border-sand-300 text-ink-600 absolute top-3 left-3 max-w-[60%] truncate rounded-full border bg-white/90 px-2.5 py-1 text-[10px] font-medium backdrop-blur">
-          Placeholder shape: {missing.join(", ")}
-        </span>
-      )}
+      {!isEmpty && <MockAssetDisclaimer missingNames={missing} />}
     </div>
   );
 }
