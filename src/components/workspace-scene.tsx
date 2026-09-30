@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useMemo, useRef } from "react";
+import { Suspense, useMemo, useRef, useState } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import {
   ContactShadows,
@@ -14,6 +14,7 @@ import { finishFor } from "@/lib/finishes";
 import { layoutScene, sceneRadius, type Placement } from "@/lib/scene";
 import { useWorkspace } from "@/store/workspace-store";
 import type { Setup } from "@/types/workspace";
+import { ObjectInspector3D, SceneHotspots } from "@/components/scene-hotspots";
 
 /**
  * The live 3D preview.
@@ -39,12 +40,15 @@ export function WorkspaceScene({
 }: WorkspaceSceneProps) {
   const placements = layoutScene(setup);
   const radius = sceneRadius(setup);
+  const selectedProductId = useWorkspace((s) => s.selectedProductId);
+  const setSelectedProductId = useWorkspace((s) => s.setSelectedProductId);
 
   return (
     <div className={cn("absolute inset-0 h-full w-full", className)}>
       <Canvas
         shadows
         dpr={[1, 1.8]}
+        onPointerMissed={() => setSelectedProductId(null)}
         camera={{
           position: [
             0.08,
@@ -77,8 +81,19 @@ export function WorkspaceScene({
         <Suspense fallback={null}>
           <group position={[0, -0.42, 0]}>
             {placements.map((p) => (
-              <PlacedModel key={p.key} placement={p} />
+              <PlacedModel
+                key={p.key}
+                placement={p}
+                isSelected={selectedProductId === p.productId}
+                onSelect={() =>
+                  setSelectedProductId(
+                    selectedProductId === p.productId ? null : p.productId,
+                  )
+                }
+              />
             ))}
+
+            {!readOnly && <SceneHotspots setup={setup} />}
 
             {setup.desk && (
               <SideTable deskProductId={setup.desk.productId} />
@@ -115,22 +130,50 @@ export function WorkspaceScene({
 }
 
 /** A single product instance, tinted and animated into place. */
-function PlacedModel({ placement }: { placement: Placement }) {
-  if (!placement.url) return <GhostBox placement={placement} />;
-  return <GLTFModel placement={placement} url={placement.url} />;
+function PlacedModel({
+  placement,
+  isSelected,
+  onSelect,
+}: {
+  placement: Placement;
+  isSelected: boolean;
+  onSelect: () => void;
+}) {
+  if (!placement.url) {
+    return (
+      <GhostBox
+        placement={placement}
+        isSelected={isSelected}
+        onSelect={onSelect}
+      />
+    );
+  }
+  return (
+    <GLTFModel
+      placement={placement}
+      url={placement.url}
+      isSelected={isSelected}
+      onSelect={onSelect}
+    />
+  );
 }
 
 function GLTFModel({
   placement,
   url,
+  isSelected,
+  onSelect,
 }: {
   placement: Placement;
   url: string;
+  isSelected: boolean;
+  onSelect: () => void;
 }) {
   const { scene } = useGLTF(url);
   const group = useRef<THREE.Group>(null);
   const highlight = useWorkspace((s) => s.highlight);
-  const isHighlighted = highlight?.productId === placement.productId;
+  const isHighlighted = highlight?.productId === placement.productId || isSelected;
+  const [_hovered, setHovered] = useState(false);
 
   // Clone so the same asset can appear twice (dual monitors) with its own
   // transform, and apply the product's finish to every mesh in it.
@@ -180,13 +223,13 @@ function GLTFModel({
     if (!group.current) return;
     progress.current = Math.min(1, progress.current + delta * 2.6);
     const eased = 1 - Math.pow(1 - progress.current, 3);
-    const target = isHighlighted ? 1.035 : 1;
+    const target = isHighlighted ? 1.04 : 1;
     const current = group.current.scale.x;
     const next = current + (target - current) * Math.min(1, delta * 8);
 
     group.current.scale.setScalar(eased * next);
     group.current.position.y =
-      placement.position[1] + (1 - eased) * 0.55 + (isHighlighted ? 0.012 : 0);
+      placement.position[1] + (1 - eased) * 0.55 + (isHighlighted ? 0.015 : 0);
   });
 
   return (
@@ -195,8 +238,43 @@ function GLTFModel({
       position={placement.position}
       rotation={placement.rotation}
       scale={0}
+      onClick={(e) => {
+        e.stopPropagation();
+        onSelect();
+      }}
+      onPointerOver={(e) => {
+        e.stopPropagation();
+        setHovered(true);
+        document.body.style.cursor = "pointer";
+      }}
+      onPointerOut={() => {
+        setHovered(false);
+        document.body.style.cursor = "default";
+      }}
     >
-      <primitive object={model} />
+      <primitive
+        object={model}
+        onClick={(e: any) => {
+          e.stopPropagation();
+          onSelect();
+        }}
+        onPointerOver={(e: any) => {
+          e.stopPropagation();
+          setHovered(true);
+          document.body.style.cursor = "pointer";
+        }}
+        onPointerOut={() => {
+          setHovered(false);
+          document.body.style.cursor = "default";
+        }}
+      />
+      {isSelected && (
+        <ObjectInspector3D
+          productId={placement.productId}
+          position={[0, 0.45, 0]}
+          onClose={onSelect}
+        />
+      )}
     </group>
   );
 }
@@ -205,26 +283,53 @@ function GLTFModel({
  * Placeholder for catalog items with no generated mesh — a translucent volume
  * rather than nothing, so the setup still reads as complete.
  */
-function GhostBox({ placement }: { placement: Placement }) {
+function GhostBox({
+  placement,
+  isSelected,
+  onSelect,
+}: {
+  placement: Placement;
+  isSelected: boolean;
+  onSelect: () => void;
+}) {
   const finish = finishFor(placement.productId);
   return (
-    <mesh
+    <group
       position={[
         placement.position[0],
         placement.position[1] + 0.11,
         placement.position[2],
       ]}
       rotation={placement.rotation}
-      castShadow
+      onClick={(e) => {
+        e.stopPropagation();
+        onSelect();
+      }}
+      onPointerOver={(e) => {
+        e.stopPropagation();
+        document.body.style.cursor = "pointer";
+      }}
+      onPointerOut={() => {
+        document.body.style.cursor = "default";
+      }}
     >
-      <boxGeometry args={[0.2, 0.22, 0.2]} />
-      <meshStandardMaterial
-        color={finish.color}
-        transparent
-        opacity={0.42}
-        roughness={0.7}
-      />
-    </mesh>
+      <mesh castShadow>
+        <boxGeometry args={[0.2, 0.22, 0.2]} />
+        <meshStandardMaterial
+          color={finish.color}
+          transparent
+          opacity={isSelected ? 0.75 : 0.42}
+          roughness={0.7}
+        />
+      </mesh>
+      {isSelected && (
+        <ObjectInspector3D
+          productId={placement.productId}
+          position={[0, 0.25, 0]}
+          onClose={onSelect}
+        />
+      )}
+    </group>
   );
 }
 

@@ -42,6 +42,10 @@ architecture follows from them.
 - **Dedicated Side Credenza (`SideTable`):** Lifestyle gear (such as the Nespresso machine) sits on a dedicated side table beside the main desk at `SIDE_TABLE_TOP = 0.58m`, rather than on the floor. Its top surface dynamically syncs with the active desk finish (warm oak wood or graphite).
 - **Default Camera View:** Elevated front-view perspective positioned behind the chair looking across the desk towards the displays, giving an immediate sense of sitting down to work.
 - **Mechanical Keyboard Upgrade:** Equipped with a dedicated high-fidelity mechanical keyboard model with sculpted keycaps, PBR textures, and per-key RGB backlighting, auto-grounded flush to the desktop.
+- **Potted Plant Asset Upgrade:** Added a photorealistic potted pothos plant on wooden legs with WebP textures and Draco compression (320 KB, replacing the placeholder cube).
+- **3D In-Scene Hotspot Pins (`SceneHotspots`):** Interactive floating radar pins anchored directly to empty sockets in the 3D space (`+ 2nd Monitor`, `+ Desk Lamp`, `+ Coffee Machine`, `+ Place Plant`) with 1-click add and live price badges.
+- **Click-to-Inspect & Direct 3D Editing (`ObjectInspector3D`):** Clicking any furniture or accessory in the 3D scene opens a floating HUD directly in 3D space to swap models (e.g. Ergonomic ↔ Gaming chair, Standing ↔ Oak desk), toggle variants, or remove items.
+- **Hotspots Visibility Toggle:** A top-stage control lets users toggle between guided configuration mode and clean studio presentation mode.
 
 **Presets over empty state.** A first-time visitor lands on a complete,
 good-looking setup in one click (The Lean Nomad / The Deep Worker / The Dual Screen)

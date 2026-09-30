@@ -108,5 +108,15 @@
     ],
     "faces": 40000,
     "height": 0.33
+  },
+  "plant-monstera": {
+    "bytes": 320936,
+    "extents": [
+      0.82,
+      0.95,
+      0.8
+    ],
+    "faces": 15744,
+    "height": 0.95
   }
 }

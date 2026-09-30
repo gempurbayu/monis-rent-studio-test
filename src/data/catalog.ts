@@ -327,6 +327,7 @@ export const PRODUCTS: Product[] = [
     zone: "workspace",
     pricePerWeek: 2,
     image: `${CDN}/Smart_Air_Purifier_6_5_bad4579786.jpg`,
+    art: "plant-monstera",
     glyph: "🪴",
     badges: ["Crowd favourite"],
     maxQty: 3,

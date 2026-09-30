@@ -66,6 +66,7 @@ const MODELS = new Set([
   "mouse-mx-master",
   "lamp-desk",
   "nespresso",
+  "plant-monstera",
 ]);
 
 export function modelUrl(productId: string): string | null {

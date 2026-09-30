@@ -24,10 +24,17 @@ interface WorkspaceState {
   activeSlot: Slot;
   /** Last item added/changed — drives the stage pop animation. */
   highlight: Highlight | null;
+  /** Active object clicked in the 3D scene to show floating contextual controls. */
+  selectedProductId: string | null;
+  /** Whether 3D in-scene '+ Add' hotspot pins are visible. */
+  showHotspots: boolean;
   /** Set once the persisted setup has been rehydrated on the client. */
   hydrated: boolean;
 
   setActiveSlot: (slot: Slot) => void;
+  setSelectedProductId: (id: string | null) => void;
+  setShowHotspots: (show: boolean) => void;
+  toggleHotspots: () => void;
   setWeeks: (weeks: RentalWeeks) => void;
 
   /** Select (or deselect) the single desk / chair. */
@@ -56,9 +63,14 @@ export const useWorkspace = create<WorkspaceState>()(
       weeks: 4,
       activeSlot: "desk",
       highlight: null,
+      selectedProductId: null,
+      showHotspots: true,
       hydrated: false,
 
       setActiveSlot: (slot) => set({ activeSlot: slot }),
+      setSelectedProductId: (id) => set({ selectedProductId: id }),
+      setShowHotspots: (show) => set({ showHotspots: show }),
+      toggleHotspots: () => set((s) => ({ showHotspots: !s.showHotspots })),
       setWeeks: (weeks) => set({ weeks }),
 
       chooseBase: (slot, productId) => {
@@ -190,10 +202,11 @@ export const useWorkspace = create<WorkspaceState>()(
             accessories: preset.setup.accessories.map((a) => ({ ...a })),
           },
           highlight: { productId: preset.setup.desk?.productId ?? "", at: Date.now() },
+          selectedProductId: null,
         });
       },
 
-      reset: () => set({ setup: EMPTY_SETUP, highlight: null }),
+      reset: () => set({ setup: EMPTY_SETUP, highlight: null, selectedProductId: null }),
 
       loadSetup: (setup, weeks) =>
         set((s) => ({

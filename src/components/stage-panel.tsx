@@ -2,7 +2,7 @@
 
 import dynamic from "next/dynamic";
 import { useState } from "react";
-import { Box, Loader2, RotateCw } from "lucide-react";
+import { Box, Loader2, RotateCw, Sparkles } from "lucide-react";
 import { cn } from "@/lib/cn";
 import { hasModel } from "@/lib/scene";
 import { PRODUCT_MAP } from "@/data/catalog";
@@ -33,6 +33,8 @@ interface StagePanelProps {
 
 export function StagePanel({ setup, readOnly, className }: StagePanelProps) {
   const [remounts, setRemounts] = useState(0);
+  const showHotspots = useWorkspace((s) => s.showHotspots);
+  const toggleHotspots = useWorkspace((s) => s.toggleHotspots);
   const itemCount =
     (setup.desk ? 1 : 0) + (setup.chair ? 1 : 0) + setup.accessories.length;
   const isEmpty = itemCount === 0;
@@ -58,17 +60,34 @@ export function StagePanel({ setup, readOnly, className }: StagePanelProps) {
       {!readOnly && !isEmpty && (
         <>
           <span className="text-ink-600/80 pointer-events-none absolute bottom-3 left-1/2 -translate-x-1/2 text-[11px] font-medium">
-            Drag to orbit · scroll to zoom
+            Drag to orbit · scroll to zoom · click item to edit
           </span>
 
-          <button
-            type="button"
-            onClick={() => setRemounts((n) => n + 1)}
-            title="Reset the camera"
-            className="border-sand-300 text-ink-700 hover:border-coral-500 hover:text-coral-600 absolute top-3 right-3 grid size-8 place-items-center rounded-full border bg-white/90 backdrop-blur transition"
-          >
-            <RotateCw className="size-3.5" />
-          </button>
+          <div className="absolute top-3 right-3 flex items-center gap-2 z-20">
+            <button
+              type="button"
+              onClick={toggleHotspots}
+              title={showHotspots ? "Hide 3D in-scene hotspots" : "Show 3D in-scene hotspots"}
+              className={cn(
+                "flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-semibold backdrop-blur transition shadow-sm",
+                showHotspots
+                  ? "border-teal-600 bg-teal-700 text-white shadow-teal-700/20"
+                  : "border-sand-300 bg-white/90 text-ink-700 hover:border-teal-500 hover:text-teal-600",
+              )}
+            >
+              <Sparkles className="size-3" />
+              <span>{showHotspots ? "Hotspots On" : "Hotspots"}</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setRemounts((n) => n + 1)}
+              title="Reset the camera"
+              className="border-sand-300 text-ink-700 hover:border-coral-500 hover:text-coral-600 grid size-8 place-items-center rounded-full border bg-white/90 backdrop-blur transition"
+            >
+              <RotateCw className="size-3.5" />
+            </button>
+          </div>
         </>
       )}
 
