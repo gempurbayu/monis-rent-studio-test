@@ -99,7 +99,7 @@ export function WorkspaceScene({
               <SideTable deskProductId={setup.desk.productId} />
             )}
 
-            <Floor radius={radius} />
+            <StudioRoomEnvironment />
             <ContactShadows
               position={[0, 0.002, 0]}
               opacity={0.42}
@@ -119,6 +119,8 @@ export function WorkspaceScene({
           target={[-0.04, 0.08, 0.18]}
           minPolarAngle={0.25}
           maxPolarAngle={Math.PI / 2.08}
+          minAzimuthAngle={-Math.PI / 3.2}
+          maxAzimuthAngle={Math.PI / 3.2}
           minDistance={1.8}
           maxDistance={6.5}
           enablePan={false}
@@ -333,13 +335,131 @@ function GhostBox({
   );
 }
 
-/** The platform the setup stands on. */
-function Floor({ radius }: { radius: number }) {
+/**
+ * Architectural studio room environment:
+ * - Natural microcement floor
+ * - Woven office area rug underneath the desk and chair
+ * - Back lime wash feature wall with architectural baseboard trim
+ * - Modern acoustic vertical oak wood slat wall behind the coffee station
+ * - Minimalist framed modern art piece on the wall
+ */
+function StudioRoomEnvironment() {
+  const slatCount = 14;
+  const slatWidth = 0.034;
+  const slatSpacing = 0.07;
+  const slatStartX = -1.55;
+
   return (
-    <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, 0]} receiveShadow>
-      <circleGeometry args={[radius * 1.35, 64]} />
-      <meshStandardMaterial color="#efe6d6" roughness={0.95} metalness={0} />
-    </mesh>
+    <group position={[0, 0, 0]}>
+      {/* 1. Seamless microcement room floor */}
+      <mesh
+        rotation={[-Math.PI / 2, 0, 0]}
+        position={[0, -0.002, 0]}
+        receiveShadow
+      >
+        <planeGeometry args={[16, 16]} />
+        <meshStandardMaterial
+          color="#eee7db"
+          roughness={0.92}
+          metalness={0.02}
+        />
+      </mesh>
+
+      {/* 2. Textured office area rug under desk and chair */}
+      <group position={[0, 0.001, 0.22]}>
+        {/* Main woven rug body */}
+        <mesh rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
+          <planeGeometry args={[2.8, 2.3]} />
+          <meshStandardMaterial
+            color="#dfd6c5"
+            roughness={0.96}
+            metalness={0.0}
+          />
+        </mesh>
+        {/* Subtle border trim */}
+        <mesh
+          rotation={[-Math.PI / 2, 0, 0]}
+          position={[0, 0, -0.0005]}
+          receiveShadow
+        >
+          <planeGeometry args={[2.88, 2.38]} />
+          <meshStandardMaterial
+            color="#cfc4b0"
+            roughness={0.98}
+            metalness={0.0}
+          />
+        </mesh>
+      </group>
+
+      {/* 3. Back architectural feature wall */}
+      <mesh position={[0, 1.8, -1.25]} receiveShadow>
+        <boxGeometry args={[14, 4.0, 0.08]} />
+        <meshStandardMaterial
+          color="#ebe4d8"
+          roughness={0.95}
+          metalness={0.01}
+        />
+      </mesh>
+
+      {/* 4. Architectural baseboard trim (skirting board) */}
+      <mesh position={[0, 0.045, -1.205]} receiveShadow castShadow>
+        <boxGeometry args={[14, 0.09, 0.02]} />
+        <meshStandardMaterial
+          color="#ded3c2"
+          roughness={0.85}
+          metalness={0.05}
+        />
+      </mesh>
+
+      {/* 5. Acoustic vertical oak wood slat wall (behind credenza on the left) */}
+      <group position={[0, 0, -1.21]}>
+        {/* Acoustic felt backing in dark charcoal */}
+        <mesh position={[-1.08, 1.7, 0]} receiveShadow>
+          <boxGeometry args={[1.05, 3.4, 0.01]} />
+          <meshStandardMaterial color="#2c2d2c" roughness={0.95} />
+        </mesh>
+
+        {/* Vertical oak slats */}
+        {Array.from({ length: slatCount }).map((_, i) => (
+          <mesh
+            key={i}
+            position={[slatStartX + i * slatSpacing, 1.7, 0.012]}
+            castShadow
+            receiveShadow
+          >
+            <boxGeometry args={[slatWidth, 3.4, 0.018]} />
+            <meshStandardMaterial
+              color="#b88452"
+              roughness={0.65}
+              metalness={0.05}
+            />
+          </mesh>
+        ))}
+      </group>
+
+      {/* 6. Minimalist modern art frame on the right wall */}
+      <group position={[0.72, 1.85, -1.20]}>
+        {/* Outer frame */}
+        <mesh castShadow>
+          <boxGeometry args={[0.78, 1.05, 0.025]} />
+          <meshStandardMaterial color="#1e201f" roughness={0.4} metalness={0.8} />
+        </mesh>
+        {/* Canvas mat / passepartout */}
+        <mesh position={[0, 0, 0.014]}>
+          <boxGeometry args={[0.72, 0.99, 0.005]} />
+          <meshStandardMaterial color="#f7f3eb" roughness={0.95} />
+        </mesh>
+        {/* Abstract terracotta & sage shapes */}
+        <mesh position={[0, 0.08, 0.018]}>
+          <circleGeometry args={[0.18, 32]} />
+          <meshStandardMaterial color="#c27453" roughness={0.9} />
+        </mesh>
+        <mesh position={[0, -0.16, 0.018]}>
+          <planeGeometry args={[0.36, 0.22]} />
+          <meshStandardMaterial color="#556b62" roughness={0.9} />
+        </mesh>
+      </group>
+    </group>
   );
 }
 
