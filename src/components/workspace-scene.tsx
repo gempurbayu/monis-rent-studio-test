@@ -47,11 +47,11 @@ export function WorkspaceScene({
         dpr={[1, 1.8]}
         camera={{
           position: [
-            0.15,
-            1.88 + radius * 0.15,
-            2.65 + radius * 0.35,
+            0.08,
+            1.22 + radius * 0.15,
+            3.15 + radius * 0.35,
           ],
-          fov: 38,
+          fov: 36,
         }}
         gl={{ antialias: true, alpha: true }}
       >
@@ -101,7 +101,7 @@ export function WorkspaceScene({
           enabled={!readOnly}
           autoRotate={readOnly}
           autoRotateSpeed={0.55}
-          target={[0, 0.58, 0]}
+          target={[-0.04, 0.08, 0.18]}
           minPolarAngle={0.25}
           maxPolarAngle={Math.PI / 2.08}
           minDistance={1.8}
