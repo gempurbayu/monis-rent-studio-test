@@ -40,8 +40,13 @@ export interface Product {
   listPricePerWeek?: number;
   /** Real product photography — catalog cards only. */
   image: string;
-  /** Key into the stage art registry (`src/components/art/stage-art.tsx`). */
-  art: string;
+  /**
+   * Basename of the generated mesh in /public/models, when one exists.
+   * Products without it render as a placeholder volume in the 3D scene.
+   */
+  art?: string;
+  /** Emoji used in compact lists and empty states. */
+  glyph?: string;
   badges?: string[];
   variants?: ProductVariant[];
   /** How many of this item a user may stack into one setup. */

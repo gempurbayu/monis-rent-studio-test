@@ -1,0 +1,15 @@
+{
+  "ok": [
+    "chair-gaming"
+  ],
+  "failed": [],
+  "params": {
+    "steps": 30,
+    "guidance_scale": 5.0,
+    "seed": 1234,
+    "octree_resolution": 256,
+    "check_box_rembg": true,
+    "num_chunks": 8000,
+    "randomize_seed": false
+  }
+}

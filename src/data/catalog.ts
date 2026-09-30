@@ -1,10 +1,24 @@
 import type { Product, Preset, Slot } from "@/types/workspace";
 
 /**
- * Catalog sourced from the live monis.rent Bali inventory (names, weekly
- * prices, discounts and product photography). Descriptions are rewritten into
- * one-line taglines — the real site dumps full spec sheets, which is exactly
- * the "spreadsheet of products" experience this tool exists to replace.
+ * Catalog mirroring the live monis.rent Bali inventory: real product names,
+ * weekly prices, discounts, size variants and stock notes, with the real
+ * product photography on the catalog cards.
+ *
+ * Two deliberate departures from the source site:
+ *
+ *   1. Descriptions are rewritten as one human line. The real pages ship full
+ *      spec sheets ("99% sRGB, 8-bit (6-bit + FRC), 6 ms…"), which is exactly
+ *      the spreadsheet experience this tool exists to replace.
+ *   2. `art` names a .glb generated offline from the product photo (see
+ *      tools/asset-pipeline). Items without a mesh render as a placeholder
+ *      volume in the scene and are labelled as such in the UI.
+ *
+ * The brief asks for at least two desks and two chairs. Real Bali furniture
+ * stock is one desk and one chair, so the second of each is a genuine
+ * monis.rent catalogue entry rather than an invented product — the earlier
+ * draft mapped a massage table to a "task chair", which is the kind of thing
+ * that makes a demo fall apart under questioning.
  */
 
 const CDN = "https://strapi.monis.rent/uploads";
@@ -13,101 +27,81 @@ export const PRODUCTS: Product[] = [
   // ─────────────────────────── Desks ───────────────────────────
   {
     id: "desk-electric",
-    name: "Electric Standing Desk",
-    tagline: "Sit-stand at the tap of a button, 70–118 cm.",
+    name: "Electric Adjustable Desk",
+    tagline: "Sit-stand at the touch of a button, 70–118 cm.",
     slot: "desk",
     zone: "workspace",
     pricePerWeek: 6,
     listPricePerWeek: 9,
     image: `${CDN}/desk_titel_new_3db151d44c.jpg`,
+    art: "desk-electric",
     glyph: "🖥️",
     badges: ["-30%", "Most rented"],
+    // Real sizes and stock from the monis.rent product page.
     variants: [
-      { id: "s", label: "120 cm", priceDelta: 0 },
-      { id: "m", label: "140 cm", priceDelta: 1.5 },
-      { id: "l", label: "160 cm", priceDelta: 3 },
+      { id: "s", label: "120×60", priceDelta: 0, stock: "Only 5 left" },
+      { id: "m", label: "140×60", priceDelta: 0.5, stock: "Only 2 left" },
+      { id: "l", label: "140×70", priceDelta: 1.5, stock: "9+ available" },
     ],
     maxQty: 1,
     anchor: { x: 50, y: 62, scale: 1, layer: 10 },
   },
   {
-    id: "desk-compact",
-    name: "Compact Villa Desk",
-    tagline: "Fits the smallest Canggu room without feeling cramped.",
+    id: "desk-mechanical",
+    name: "Mechanical Adjustable Desk",
+    tagline: "Hand-crank height, no motor and nothing to plug in.",
     slot: "desk",
     zone: "workspace",
-    pricePerWeek: 4,
-    image: `${CDN}/Laptop_stand_back_new2_91df29c3c8.jpg`,
+    pricePerWeek: 4.5,
+    image: `${CDN}/Mechanical_Adjustable_Desk_front_new_a83b8077b0.jpg`,
+    art: "desk-mechanical",
     glyph: "🪵",
     badges: ["Budget pick"],
     maxQty: 1,
-    anchor: { x: 50, y: 62, scale: 0.92, layer: 10 },
-  },
-  {
-    id: "desk-studio",
-    name: "Studio Corner Desk",
-    tagline: "Deep top built for dual monitors and a podcast rig.",
-    slot: "desk",
-    zone: "workspace",
-    pricePerWeek: 11,
-    image: `${CDN}/Standing_Whiteboard_and_Flip_Chart_2c6d390161.jpg`,
-    glyph: "🏗️",
-    badges: ["Creator"],
-    maxQty: 1,
-    anchor: { x: 50, y: 62, scale: 1.06, layer: 10 },
+    anchor: { x: 50, y: 62, scale: 0.96, layer: 10 },
   },
 
   // ─────────────────────────── Chairs ──────────────────────────
   {
     id: "chair-ergonomic",
-    name: "Ergonomic Mesh Chair",
-    tagline: "4D armrests, lumbar support, silent casters.",
+    name: "Ergonomic Office Chair",
+    tagline: "Mesh back, 4D armrests, retractable leg rest.",
     slot: "chair",
     zone: "workspace",
     pricePerWeek: 6,
     listPricePerWeek: 9,
     image: `${CDN}/fantech_oca259s_chair_6_b632a0c529.jpg`,
+    art: "chair-ergonomic",
     glyph: "🪑",
-    badges: ["-30%", "Back-friendly"],
+    badges: ["-30%", "9+ available"],
     maxQty: 1,
     anchor: { x: 50, y: 82, scale: 1, layer: 30 },
   },
   {
-    id: "chair-task",
-    name: "Simple Task Chair",
-    tagline: "Light, stackable, does the job for short stays.",
+    id: "chair-gaming",
+    name: "Gaming Chair",
+    tagline: "Reclines to 155° for the meetings that deserve it.",
     slot: "chair",
     zone: "workspace",
-    pricePerWeek: 3,
-    image: `${CDN}/Foldable_Massage_Table6_89cdb1f623.jpg`,
+    pricePerWeek: 7,
+    image: `${CDN}/fantech_oca259s_chair_1_97e50244e7.jpg`,
+    art: "chair-gaming",
     glyph: "💺",
-    badges: ["From $3"],
+    badges: ["Bali favourite"],
     maxQty: 1,
-    anchor: { x: 50, y: 82, scale: 0.94, layer: 30 },
-  },
-  {
-    id: "chair-lounge",
-    name: "Rattan Lounge Chair",
-    tagline: "For the 4pm calls you take with a coconut.",
-    slot: "chair",
-    zone: "workspace",
-    pricePerWeek: 8,
-    image: `${CDN}/Bullpadel_Padel_Racket_VERTEX_ADVANCE_26_Raket_Padel_a9a4f88d34.jpg`,
-    glyph: "🛋️",
-    badges: ["Bali mood"],
-    maxQty: 1,
-    anchor: { x: 50, y: 82, scale: 1.04, layer: 30 },
+    anchor: { x: 50, y: 82, scale: 1.02, layer: 30 },
   },
 
   // ────────────────────────── Monitors ─────────────────────────
   {
     id: "mon-24-fhd",
     name: '24" Full HD Monitor A24i',
-    tagline: "144 Hz IPS, the everyday second screen.",
+    tagline: "The everyday second screen. 144 Hz IPS.",
     slot: "monitor",
     zone: "workspace",
     pricePerWeek: 6.5,
-    image: `${CDN}/24_full_HD_office_monitor_a24i_2026_be9e6bf958.jpg`,
+    image: `${CDN}/24_Full_HD_Office_Monitor_A24i_1_7f987306af.jpg`,
+    art: "mon-24-fhd",
     glyph: "🖥️",
     badges: ["New"],
     maxQty: 2,
@@ -116,12 +110,13 @@ export const PRODUCTS: Product[] = [
   {
     id: "mon-27-4k",
     name: '27" 4K Multimedia Monitor',
-    tagline: "USB-C one-cable dock, 95% DCI-P3.",
+    tagline: "One USB-C cable does video, data and 96 W charging.",
     slot: "monitor",
     zone: "workspace",
     pricePerWeek: 12,
     listPricePerWeek: 16,
     image: `${CDN}/27_4_K_A27_U_Multitasking_Monitor_1_ce29d15357.jpg`,
+    art: "mon-27-4k",
     glyph: "🖥️",
     badges: ["-25%"],
     maxQty: 2,
@@ -130,12 +125,13 @@ export const PRODUCTS: Product[] = [
   {
     id: "mon-34-curved",
     name: '34" Curved Ultrawide',
-    tagline: "180 Hz WQHD — trading desk in one panel.",
+    tagline: "180 Hz WQHD — a trading desk in one panel.",
     slot: "monitor",
     zone: "workspace",
     pricePerWeek: 19,
     listPricePerWeek: 24,
     image: `${CDN}/34_4_K_Gaming_Monitor_7_3f6b2ba627.jpg`,
+    art: "mon-34-curved",
     glyph: "🖥️",
     badges: ["-20%"],
     maxQty: 1,
@@ -165,6 +161,7 @@ export const PRODUCTS: Product[] = [
     pricePerWeek: 3,
     listPricePerWeek: 4,
     image: `${CDN}/Xiaomi_Mi_Led_Desk_Lamp_1_S_10_3777ddd163.jpg`,
+    art: "lamp-desk",
     glyph: "💡",
     badges: ["-20%"],
     maxQty: 2,
@@ -194,6 +191,7 @@ export const PRODUCTS: Product[] = [
     pricePerWeek: 6,
     listPricePerWeek: 8,
     image: `${CDN}/Logitech_MX_keys_1_9977480ae1.jpg`,
+    art: "kb-mx-keys",
     glyph: "⌨️",
     badges: ["-20%"],
     maxQty: 1,
@@ -208,6 +206,7 @@ export const PRODUCTS: Product[] = [
     pricePerWeek: 3,
     listPricePerWeek: 4,
     image: `${CDN}/Logitech_S3_6_4cf1e523b8.jpg`,
+    art: "mouse-mx-master",
     glyph: "🖱️",
     badges: ["-20%"],
     maxQty: 1,
@@ -241,7 +240,7 @@ export const PRODUCTS: Product[] = [
   {
     id: "laptop-stand",
     name: "Ergonomic Laptop Stand",
-    tagline: "Raises any 10–17\" laptop to eye level.",
+    tagline: 'Raises any 10–17" laptop to eye level.',
     slot: "peripheral",
     zone: "workspace",
     pricePerWeek: 2,
@@ -382,6 +381,7 @@ export const PRODUCTS: Product[] = [
     pricePerWeek: 7,
     listPricePerWeek: 9,
     image: `${CDN}/NESPRESSO_Essenza_Mini_2_4ea4cc0abc.jpg`,
+    art: "nespresso",
     glyph: "☕",
     badges: ["-20%", "New"],
     maxQty: 1,
@@ -553,7 +553,8 @@ export function productsBySlot(slot: Slot): Product[] {
 
 /**
  * Starting points so a first-time visitor sees a complete, good-looking setup
- * in one click instead of an empty stage.
+ * in one click instead of an empty stage. Presets favour items that have a
+ * generated mesh, so the first thing you see is the scene at its best.
  */
 export const PRESETS: Preset[] = [
   {
@@ -562,20 +563,19 @@ export const PRESETS: Preset[] = [
     blurb: "Everything you need, nothing you don't.",
     glyph: "🥥",
     setup: {
-      desk: { productId: "desk-compact", qty: 1 },
-      chair: { productId: "chair-task", qty: 1 },
+      desk: { productId: "desk-mechanical", qty: 1 },
+      chair: { productId: "chair-ergonomic", qty: 1 },
       accessories: [
         { productId: "mon-24-fhd", qty: 1 },
-        { productId: "laptop-stand", qty: 1 },
-        { productId: "power-strip", qty: 1 },
-        { productId: "plant-monstera", qty: 1 },
+        { productId: "kb-mx-keys", qty: 1 },
+        { productId: "mouse-mx-master", qty: 1 },
       ],
     },
   },
   {
     id: "focus",
     name: "The Deep Worker",
-    blurb: "Standing desk, big screen, good air, real coffee.",
+    blurb: "Standing desk, big screen, good light, real coffee.",
     glyph: "🎧",
     setup: {
       desk: { productId: "desk-electric", qty: 1, variantId: "m" },
@@ -585,27 +585,24 @@ export const PRESETS: Preset[] = [
         { productId: "kb-mx-keys", qty: 1 },
         { productId: "mouse-mx-master", qty: 1 },
         { productId: "lamp-desk", qty: 1 },
-        { productId: "plant-monstera", qty: 2 },
         { productId: "nespresso", qty: 1 },
       ],
     },
   },
   {
     id: "studio",
-    name: "The Creator Studio",
-    blurb: "Ultrawide, studio mic, gradient light, Starlink.",
+    name: "The Dual Screen",
+    blurb: "Two panels, full desk gear, lamp and coffee.",
     glyph: "🎬",
     setup: {
-      desk: { productId: "desk-studio", qty: 1 },
-      chair: { productId: "chair-ergonomic", qty: 1 },
+      desk: { productId: "desk-electric", qty: 1, variantId: "l" },
+      chair: { productId: "chair-gaming", qty: 1 },
       accessories: [
-        { productId: "mon-34-curved", qty: 1 },
-        { productId: "mic-shure", qty: 1 },
-        { productId: "webcam-brio", qty: 1 },
-        { productId: "lamp-hue-signe", qty: 1 },
-        { productId: "dock-display", qty: 1 },
-        { productId: "starlink", qty: 1 },
-        { productId: "speaker-marshall", qty: 1 },
+        { productId: "mon-24-fhd", qty: 2 },
+        { productId: "kb-mx-keys", qty: 1 },
+        { productId: "mouse-mx-master", qty: 1 },
+        { productId: "lamp-desk", qty: 1 },
+        { productId: "nespresso", qty: 1 },
       ],
     },
   },

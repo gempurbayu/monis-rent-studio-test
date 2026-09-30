@@ -6,7 +6,7 @@ import { PresetBar } from "@/components/preset-bar";
 import { ProductPicker } from "@/components/product-picker";
 import { SlotRail } from "@/components/slot-rail";
 import { SummaryPanel } from "@/components/summary-panel";
-import { WorkspaceStage } from "@/components/workspace-stage";
+import { StagePanel } from "@/components/stage-panel";
 
 /**
  * The configurator. Layout puts the stage and the running total in a sticky
@@ -26,7 +26,7 @@ export function Configurator() {
           <PresetBar />
 
           <div className="mt-4">
-            <WorkspaceStage setup={setup} />
+            <StagePanel setup={setup} />
           </div>
 
           {/* Quick-add rails — mobile shows them under the stage */}

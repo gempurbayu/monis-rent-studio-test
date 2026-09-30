@@ -8,7 +8,7 @@ import { ArrowLeft, Check, PartyPopper, Truck } from "lucide-react";
 import { PRODUCT_MAP } from "@/data/catalog";
 import { buildQuote, formatUSD, listSavingsPerWeek } from "@/lib/pricing";
 import { useWorkspace } from "@/store/workspace-store";
-import { WorkspaceStage } from "@/components/workspace-stage";
+import { StagePanel } from "@/components/stage-panel";
 
 /**
  * Checkout / summary. Keeps the stage visible next to the line items — the
@@ -68,7 +68,7 @@ export function CheckoutView() {
 
       <div className="mt-8 grid gap-8 lg:grid-cols-[minmax(0,1fr)_380px]">
         <div className="min-w-0">
-          <WorkspaceStage setup={setup} readOnly />
+          <StagePanel setup={setup} readOnly />
 
           <ul className="border-sand-200 mt-6 divide-sand-200 divide-y rounded-3xl border bg-white">
             {quote.lines.map((line) => {

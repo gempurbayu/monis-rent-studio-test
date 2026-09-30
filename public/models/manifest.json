@@ -1,0 +1,112 @@
+{
+  "chair-ergonomic": {
+    "bytes": 124940,
+    "extents": [
+      0.665,
+      1.2,
+      0.762
+    ],
+    "faces": 90000,
+    "height": 1.2
+  },
+  "chair-gaming": {
+    "bytes": 124940,
+    "extents": [
+      0.665,
+      1.2,
+      0.762
+    ],
+    "faces": 90000,
+    "height": 1.2
+  },
+  "desk-electric": {
+    "bytes": 13496,
+    "extents": [
+      1.2,
+      0.744,
+      0.628
+    ],
+    "faces": 6000,
+    "height": 0.744
+  },
+  "desk-mechanical": {
+    "bytes": 11812,
+    "extents": [
+      1.2,
+      0.676,
+      0.634
+    ],
+    "faces": 6000,
+    "height": 0.676
+  },
+  "kb-mx-keys": {
+    "bytes": 36200,
+    "extents": [
+      0.43,
+      0.101,
+      0.132
+    ],
+    "faces": 60000,
+    "height": 0.101
+  },
+  "lamp-desk": {
+    "bytes": 6188,
+    "extents": [
+      0.377,
+      0.45,
+      0.133
+    ],
+    "faces": 3000,
+    "height": 0.45
+  },
+  "mon-24-fhd": {
+    "bytes": 3928,
+    "extents": [
+      0.54,
+      0.407,
+      0.052
+    ],
+    "faces": 4000,
+    "height": 0.407
+  },
+  "mon-27-4k": {
+    "bytes": 4728,
+    "extents": [
+      0.61,
+      0.489,
+      0.069
+    ],
+    "faces": 4000,
+    "height": 0.489
+  },
+  "mon-34-curved": {
+    "bytes": 4448,
+    "extents": [
+      0.81,
+      0.497,
+      0.083
+    ],
+    "faces": 5000,
+    "height": 0.497
+  },
+  "mouse-mx-master": {
+    "bytes": 66192,
+    "extents": [
+      0.126,
+      0.044,
+      0.123
+    ],
+    "faces": 60000,
+    "height": 0.044
+  },
+  "nespresso": {
+    "bytes": 48708,
+    "extents": [
+      0.171,
+      0.33,
+      0.228
+    ],
+    "faces": 40000,
+    "height": 0.33
+  }
+}
