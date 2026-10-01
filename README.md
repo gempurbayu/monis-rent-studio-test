@@ -7,7 +7,7 @@ the setup come together in real-time 3D, then rent it by the week.
 
 Built for the Desent Solutions developer challenge.
 
-- **Live URL:** _pending deploy_
+- **Live URL:** https://monis-rent-studio-test.vercel.app
 - **Stack:** Next.js 16 (App Router) · React 19 · Three.js · React Three Fiber · TypeScript · Tailwind CSS v4 · Zustand · Vitest
 
 ---
