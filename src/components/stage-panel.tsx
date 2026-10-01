@@ -2,13 +2,14 @@
 
 import dynamic from "next/dynamic";
 import { useState } from "react";
-import { Box, Loader2, RotateCw, Sparkles } from "lucide-react";
+import { Box, Loader2, Move, RotateCw, Sparkles } from "lucide-react";
 import { cn } from "@/lib/cn";
 import { hasModel } from "@/lib/scene";
 import { PRODUCT_MAP } from "@/data/catalog";
 import { useWorkspace } from "@/store/workspace-store";
 import type { Setup } from "@/types/workspace";
 import { MockAssetDisclaimer } from "@/components/mock-asset-notice";
+import { ObjectInspectorDock } from "@/components/scene-hotspots";
 
 /**
  * Wrapper around the 3D canvas.
@@ -35,6 +36,12 @@ export function StagePanel({ setup, readOnly, className }: StagePanelProps) {
   const [remounts, setRemounts] = useState(0);
   const showHotspots = useWorkspace((s) => s.showHotspots);
   const toggleHotspots = useWorkspace((s) => s.toggleHotspots);
+  const selectedItemKey = useWorkspace((s) => s.selectedItemKey);
+  const selectedProductId = useWorkspace((s) => s.selectedProductId);
+  const setSelectedItem = useWorkspace((s) => s.setSelectedItem);
+  const transforms = useWorkspace((s) => s.transforms);
+  const resetAllTransforms = useWorkspace((s) => s.resetAllTransforms);
+  const hasCustomTransforms = Object.keys(transforms).length > 0;
   const itemCount =
     (setup.desk ? 1 : 0) + (setup.chair ? 1 : 0) + setup.accessories.length;
   const isEmpty = itemCount === 0;
@@ -60,10 +67,22 @@ export function StagePanel({ setup, readOnly, className }: StagePanelProps) {
       {!readOnly && !isEmpty && (
         <>
           <span className="text-ink-600/80 pointer-events-none absolute bottom-3 left-1/2 -translate-x-1/2 text-[11px] font-medium">
-            Drag to orbit · scroll to zoom · click item to edit
+            Drag to orbit · click any object to move, rotate & customize
           </span>
 
           <div className="absolute top-3 right-3 flex items-center gap-2 z-20">
+            {hasCustomTransforms && (
+              <button
+                type="button"
+                onClick={resetAllTransforms}
+                title="Reset custom object positions"
+                className="flex items-center gap-1.5 rounded-full border border-sand-300 bg-white/95 px-2.5 py-1 text-xs font-semibold text-ink-700 shadow-sm hover:border-teal-500 hover:text-teal-700 transition"
+              >
+                <Move className="size-3 text-teal-700" />
+                <span>Reset Layout</span>
+              </button>
+            )}
+
             <button
               type="button"
               onClick={toggleHotspots}
@@ -89,6 +108,14 @@ export function StagePanel({ setup, readOnly, className }: StagePanelProps) {
             </button>
           </div>
         </>
+      )}
+
+      {!readOnly && selectedProductId && selectedItemKey && (
+        <ObjectInspectorDock
+          itemKey={selectedItemKey}
+          productId={selectedProductId}
+          onClose={() => setSelectedItem(null, null)}
+        />
       )}
 
       {!isEmpty && <MockAssetDisclaimer missingNames={missing} />}

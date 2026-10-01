@@ -14,7 +14,7 @@ import { finishFor } from "@/lib/finishes";
 import { layoutScene, sceneRadius, type Placement } from "@/lib/scene";
 import { useWorkspace } from "@/store/workspace-store";
 import type { Setup } from "@/types/workspace";
-import { ObjectInspector3D, SceneHotspots } from "@/components/scene-hotspots";
+import { SceneHotspots } from "@/components/scene-hotspots";
 
 /**
  * The live 3D preview.
@@ -35,27 +35,23 @@ interface WorkspaceSceneProps {
 
 export function WorkspaceScene({
   setup,
-  readOnly = false,
+  readOnly,
   className,
 }: WorkspaceSceneProps) {
   const placements = layoutScene(setup);
   const radius = sceneRadius(setup);
-  const selectedProductId = useWorkspace((s) => s.selectedProductId);
-  const setSelectedProductId = useWorkspace((s) => s.setSelectedProductId);
+  const selectedItemKey = useWorkspace((s) => s.selectedItemKey);
+  const setSelectedItem = useWorkspace((s) => s.setSelectedItem);
 
   return (
     <div className={cn("absolute inset-0 h-full w-full", className)}>
       <Canvas
         shadows
         dpr={[1, 1.8]}
-        onPointerMissed={() => setSelectedProductId(null)}
+        onPointerMissed={() => setSelectedItem(null, null)}
         camera={{
-          position: [
-            0.08,
-            1.22 + radius * 0.15,
-            3.15 + radius * 0.35,
-          ],
-          fov: 36,
+          position: [0.75, 1.85, 3.75],
+          fov: 42,
         }}
         gl={{ antialias: true, alpha: true }}
       >
@@ -84,10 +80,11 @@ export function WorkspaceScene({
               <PlacedModel
                 key={p.key}
                 placement={p}
-                isSelected={selectedProductId === p.productId}
+                isSelected={selectedItemKey === p.key}
                 onSelect={() =>
-                  setSelectedProductId(
-                    selectedProductId === p.productId ? null : p.productId,
+                  setSelectedItem(
+                    selectedItemKey === p.key ? null : p.key,
+                    selectedItemKey === p.key ? null : p.productId,
                   )
                 }
               />
@@ -116,7 +113,7 @@ export function WorkspaceScene({
           enabled={!readOnly}
           autoRotate={readOnly}
           autoRotateSpeed={0.55}
-          target={[-0.04, 0.08, 0.18]}
+          target={[-0.04, 0.42, -0.05]}
           minPolarAngle={0.25}
           maxPolarAngle={Math.PI / 2.08}
           minAzimuthAngle={-Math.PI / 3.2}
@@ -219,6 +216,11 @@ function GLTFModel({
     return clone;
   }, [scene, placement.productId]);
 
+  const transforms = useWorkspace((s) => s.transforms);
+  const tf =
+    transforms[placement.key] ??
+    transforms[placement.productId] ?? { offsetX: 0, offsetZ: 0, rotY: 0 };
+
   // Drop-in on mount, then a gentle lift while highlighted.
   const progress = useRef(0);
   useFrame((_, delta) => {
@@ -230,8 +232,11 @@ function GLTFModel({
     const next = current + (target - current) * Math.min(1, delta * 8);
 
     group.current.scale.setScalar(eased * next);
+    group.current.position.x = placement.position[0] + tf.offsetX;
     group.current.position.y =
       placement.position[1] + (1 - eased) * 0.55 + (isHighlighted ? 0.015 : 0);
+    group.current.position.z = placement.position[2] + tf.offsetZ;
+    group.current.rotation.y = placement.rotation[1] + tf.rotY;
   });
 
   return (
@@ -271,11 +276,10 @@ function GLTFModel({
         }}
       />
       {isSelected && (
-        <ObjectInspector3D
-          productId={placement.productId}
-          position={[0, 0.45, 0]}
-          onClose={onSelect}
-        />
+        <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.003, 0]}>
+          <ringGeometry args={[0.26, 0.30, 32]} />
+          <meshBasicMaterial color="#2f8672" transparent opacity={0.7} />
+        </mesh>
       )}
     </group>
   );
@@ -295,14 +299,23 @@ function GhostBox({
   onSelect: () => void;
 }) {
   const finish = finishFor(placement.productId);
+  const transforms = useWorkspace((s) => s.transforms);
+  const tf =
+    transforms[placement.key] ??
+    transforms[placement.productId] ?? { offsetX: 0, offsetZ: 0, rotY: 0 };
+
   return (
     <group
       position={[
-        placement.position[0],
+        placement.position[0] + tf.offsetX,
         placement.position[1] + 0.11,
-        placement.position[2],
+        placement.position[2] + tf.offsetZ,
       ]}
-      rotation={placement.rotation}
+      rotation={[
+        placement.rotation[0],
+        placement.rotation[1] + tf.rotY,
+        placement.rotation[2],
+      ]}
       onClick={(e) => {
         e.stopPropagation();
         onSelect();
@@ -325,11 +338,10 @@ function GhostBox({
         />
       </mesh>
       {isSelected && (
-        <ObjectInspector3D
-          productId={placement.productId}
-          position={[0, 0.25, 0]}
-          onClose={onSelect}
-        />
+        <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.108, 0]}>
+          <ringGeometry args={[0.22, 0.26, 32]} />
+          <meshBasicMaterial color="#2f8672" transparent opacity={0.7} />
+        </mesh>
       )}
     </group>
   );

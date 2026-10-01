@@ -18,24 +18,41 @@ export interface Highlight {
   at: number;
 }
 
+export interface AssetTransform {
+  offsetX: number;
+  offsetZ: number;
+  rotY: number;
+}
+
 interface WorkspaceState {
   setup: Setup;
   weeks: RentalWeeks;
   activeSlot: Slot;
   /** Last item added/changed — drives the stage pop animation. */
   highlight: Highlight | null;
-  /** Active object clicked in the 3D scene to show floating contextual controls. */
+  /** Active item instance clicked in the 3D scene (e.g. "monitor-27-4k-0", "monitor-27-4k-1"). */
+  selectedItemKey: string | null;
+  /** Active object product ID. */
   selectedProductId: string | null;
   /** Whether 3D in-scene '+ Add' hotspot pins are visible. */
   showHotspots: boolean;
+  /** Custom user overrides for position (X/Z) and horizontal rotation (rotY) per item key. */
+  transforms: Record<string, AssetTransform>;
   /** Set once the persisted setup has been rehydrated on the client. */
   hydrated: boolean;
 
   setActiveSlot: (slot: Slot) => void;
-  setSelectedProductId: (id: string | null) => void;
+  setSelectedProductId: (id: string | null, key?: string | null) => void;
+  setSelectedItem: (key: string | null, id: string | null) => void;
   setShowHotspots: (show: boolean) => void;
   toggleHotspots: () => void;
   setWeeks: (weeks: RentalWeeks) => void;
+
+  /** Reposition and horizontal rotation controls per item instance */
+  nudgeAsset: (key: string, deltaX: number, deltaZ: number) => void;
+  rotateAsset: (key: string, deltaRotY: number) => void;
+  resetAssetTransform: (key: string) => void;
+  resetAllTransforms: () => void;
 
   /** Select (or deselect) the single desk / chair. */
   chooseBase: (slot: "desk" | "chair", productId: string) => void;
@@ -63,15 +80,78 @@ export const useWorkspace = create<WorkspaceState>()(
       weeks: 4,
       activeSlot: "desk",
       highlight: null,
+      selectedItemKey: null,
       selectedProductId: null,
       showHotspots: true,
+      transforms: {},
       hydrated: false,
 
       setActiveSlot: (slot) => set({ activeSlot: slot }),
-      setSelectedProductId: (id) => set({ selectedProductId: id }),
+      setSelectedProductId: (id, key) =>
+        set({
+          selectedProductId: id,
+          selectedItemKey: key ?? (id ? `${id}-0` : null),
+        }),
+      setSelectedItem: (key, id) =>
+        set({
+          selectedItemKey: key,
+          selectedProductId: id,
+        }),
       setShowHotspots: (show) => set({ showHotspots: show }),
       toggleHotspots: () => set((s) => ({ showHotspots: !s.showHotspots })),
       setWeeks: (weeks) => set({ weeks }),
+
+      nudgeAsset: (key, deltaX, deltaZ) =>
+        set((s) => {
+          const current = s.transforms[key] ?? { offsetX: 0, offsetZ: 0, rotY: 0 };
+          const nextX = Math.round((current.offsetX + deltaX) * 100) / 100;
+          const nextZ = Math.round((current.offsetZ + deltaZ) * 100) / 100;
+          const clampedX = Math.max(-2.0, Math.min(2.0, nextX));
+          const clampedZ = Math.max(-2.0, Math.min(2.0, nextZ));
+
+          return {
+            transforms: {
+              ...s.transforms,
+              [key]: {
+                ...current,
+                offsetX: clampedX,
+                offsetZ: clampedZ,
+              },
+            },
+          };
+        }),
+
+      rotateAsset: (key, deltaRotY) =>
+        set((s) => {
+          const current = s.transforms[key] ?? { offsetX: 0, offsetZ: 0, rotY: 0 };
+          let nextRot = current.rotY + deltaRotY;
+          if (nextRot > Math.PI) nextRot -= Math.PI * 2;
+          if (nextRot < -Math.PI) nextRot += Math.PI * 2;
+
+          return {
+            transforms: {
+              ...s.transforms,
+              [key]: {
+                ...current,
+                rotY: Math.round(nextRot * 1000) / 1000,
+              },
+            },
+          };
+        }),
+
+      resetAssetTransform: (key) =>
+        set((s) => {
+          const next = { ...s.transforms };
+          delete next[key];
+          // Also clean up by productId if legacy key exists
+          if (key.includes("-")) {
+            const baseId = key.replace(/-\d+$/, "");
+            delete next[baseId];
+          }
+          return { transforms: next };
+        }),
+
+      resetAllTransforms: () => set({ transforms: {} }),
 
       chooseBase: (slot, productId) => {
         const current = get().setup[slot];
@@ -202,11 +282,20 @@ export const useWorkspace = create<WorkspaceState>()(
             accessories: preset.setup.accessories.map((a) => ({ ...a })),
           },
           highlight: { productId: preset.setup.desk?.productId ?? "", at: Date.now() },
+          selectedItemKey: null,
           selectedProductId: null,
+          transforms: {},
         });
       },
 
-      reset: () => set({ setup: EMPTY_SETUP, highlight: null, selectedProductId: null }),
+      reset: () =>
+        set({
+          setup: EMPTY_SETUP,
+          highlight: null,
+          selectedItemKey: null,
+          selectedProductId: null,
+          transforms: {},
+        }),
 
       loadSetup: (setup, weeks) =>
         set((s) => ({
@@ -231,4 +320,8 @@ export function selectQty(setup: Setup, productId: string): number {
   if (setup.desk?.productId === productId) return setup.desk.qty;
   if (setup.chair?.productId === productId) return setup.chair.qty;
   return setup.accessories.find((a) => a.productId === productId)?.qty ?? 0;
+}
+
+if (typeof window !== "undefined") {
+  (window as any).__WORKSPACE__ = useWorkspace;
 }
